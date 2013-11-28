@@ -1,0 +1,11 @@
+[
+    {
+        "keys": ["ctrl+t", "ctrl+v"],
+        "command": "traceback_paste"
+    },
+    {
+        "keys": ["alt+d"],
+        "command": "traceback_goto_line",
+        "context": {"key": "python_traceback"}
+    }
+]

@@ -1,0 +1,6 @@
+[
+    {"caption": "Traceback: Paste Traceback",
+     "command": "traceback_paste"},
+    {"caption": "Traceback: Go To Line",
+     "command": "traceback_goto_line"},
+]
