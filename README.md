@@ -1,7 +1,7 @@
 PythonTraceback
 ===============
 
-PythonTraceback is a plugin for Sublime Text 3, that allows easy navigation in
+PythonTraceback is a plugin for Sublime Text, that allows easy navigation in
 your python tracebacks.  Copy a traceback from your terminal to clipboard,
 switch to Sublime Text and press `Ctrl+t`, `Ctrl+v`. New scratch buffer will be
 opened with the traceback. Place cursor on a line you want to navigate to and
