@@ -7,8 +7,8 @@ switch to Sublime Text and press `Ctrl+t`, `Ctrl+v`. New scratch buffer will be
 opened with the traceback. Place cursor on a line you want to navigate to and
 press `Alt+d`: file will be opened at the line, specified in traceback.
 
-While traceback window open (but not necessarily active), you can navigate up
-and down in traceback by pressing `Alt-k` and `Alt-d` respectively.
+While traceback window is open (but not necessarily active), you can navigate up
+and down in traceback by pressing `Alt-k` and `Alt-j` respectively.
 
 Pressing `Ctrl+t`, `Ctrl+v` again will replace traceback buffer with new
 traceback from the clipboard.
