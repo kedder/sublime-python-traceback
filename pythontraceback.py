@@ -31,7 +31,22 @@ class TracebackPasteCommand(sublime_plugin.WindowCommand):
         v.set_read_only(True)
         # Python syntax file fits well with tracebacks
         v.set_syntax_file('Packages/Python/Python.tmLanguage')
+
+        # Put cursor to the bottom of the screen
+        self.view_tail(v)
+
         self.window.focus_view(v)
+
+    def view_tail(self, view):
+        """Display the end of the buffer in view port
+
+        By default, sublime puts cursor on top of the screen, hiding all the
+        pasted text. This will put cursor to the bottom instead.
+        """
+        lowidth, loheight = view.text_to_layout(view.size())
+        vpwidth, vpheight = view.viewport_extent()
+        lheight = view.line_height()
+        view.set_viewport_position((0, loheight - vpheight + lheight))
 
     def find_traceback_view(self):
         for w in self.window.views():
