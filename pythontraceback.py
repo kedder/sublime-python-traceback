@@ -14,7 +14,7 @@ class TracebackPasteCommand(sublime_plugin.WindowCommand):
     copied from console) to a dedicated transient window.
     """
     def run(self, *args):
-        v = self.find_traceback_view()
+        v = find_traceback_view(self.window)
         if not v:
             # Create new traceback view
             self.window.new_file(sublime.TRANSIENT)
@@ -48,12 +48,6 @@ class TracebackPasteCommand(sublime_plugin.WindowCommand):
         lheight = view.line_height()
         view.set_viewport_position((0, loheight - vpheight + lheight))
 
-    def find_traceback_view(self):
-        for w in self.window.views():
-            if w.name() == TRACEBACK_WINDOW_NAME:
-                return w
-        return None
-
 
 class TracebackGotoLine(sublime_plugin.TextCommand):
     """Open file under cursor in traceback window and set curser on
@@ -64,29 +58,17 @@ class TracebackGotoLine(sublime_plugin.TextCommand):
             line = self.view.line(region)
             line_contents = self.view.substr(line)
 
-            filename, linenum = self.parse_line(line_contents)
-            if filename is None:
-                sublime.status_message("Traceback line is not identified.")
-                continue
+            jump_to(self.view.window(), line_contents)
 
-            self.open_file(filename, linenum)
 
-    def parse_line(self, line):
-        not_found = None, None
-        if not line:
-            return not_found
+class TracebackGoUp(sublime_plugin.WindowCommand):
+    def run(self, *args):
+        jump_to_next(self.window, -1)
 
-        m = LINE_REGEXP.search(line)
-        if not m:
-            return not_found
 
-        filename, lnum = m.groups()
-        return filename, int(lnum)
-
-    def open_file(self, filename, linenum):
-        window = sublime.active_window()
-        window.open_file("%s:%s" % (filename, linenum),
-                         sublime.ENCODED_POSITION)
+class TracebackGoDown(sublime_plugin.WindowCommand):
+    def run(self, *args):
+        jump_to_next(self.window, 1)
 
 
 class ActionContextHandler(sublime_plugin.EventListener):
@@ -99,3 +81,82 @@ class ActionContextHandler(sublime_plugin.EventListener):
             return None
 
         return view.name() == TRACEBACK_WINDOW_NAME
+
+
+def find_traceback_view(window):
+    for view in window.views():
+        if view.name() == TRACEBACK_WINDOW_NAME:
+            return view
+    return None
+
+
+def jump_to_next(window, direction):
+        tbview = find_traceback_view(window)
+        if not tbview:
+            sublime.status_message("No traceback available")
+            return
+
+        tbsel = tbview.sel()
+
+        if not tbsel:
+            # No selection - current position is not known
+            return
+
+        firstreg = tbsel[0]
+        lineno = tbview.rowcol(firstreg.a)[0]
+        newpos = firstreg.a
+
+        # Check each line until end of traceback is reached, or proper link to
+        # file is found.
+        while True:
+            lineno += direction
+            if lineno < 0:
+                # We went above first line
+                break
+
+            oldpos = newpos
+            newpos = tbview.text_point(lineno, 0)
+            if oldpos == newpos:
+                # We reached end of file
+                break
+
+            cursorreg = sublime.Region(newpos, newpos)
+            line_contents = tbview.substr(tbview.line(cursorreg))
+
+            jumped = jump_to(window, line_contents)
+            if jumped:
+                # Update cursor position in traceback view
+                tbview.run_command("goto_line", {"line": lineno+1})
+                return
+
+        # Infinite loop ended, that means that we have reached to end of the
+        # traceback. Let user know.
+        sublime.status_message("No more lines in traceback")
+
+
+def jump_to(window, line):
+    fname, lineno = parse_line(line)
+    if fname is None:
+        return False
+
+    open_file(window, fname, lineno)
+    return True
+
+
+def parse_line(line):
+    not_found = None, None
+    if not line:
+        return not_found
+
+    m = LINE_REGEXP.search(line)
+    if not m:
+        return not_found
+
+    filename, lnum = m.groups()
+    return filename, int(lnum)
+
+
+def open_file(window, filename, linenum):
+    window = sublime.active_window()
+    window.open_file("%s:%s" % (filename, linenum),
+                     sublime.ENCODED_POSITION)

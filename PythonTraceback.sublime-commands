@@ -3,4 +3,8 @@
      "command": "traceback_paste"},
     {"caption": "Traceback: Go To Line",
      "command": "traceback_goto_line"},
+    {"caption": "Traceback: Go Up",
+     "command": "traceback_go_up"},
+    {"caption": "Traceback: Go Down",
+     "command": "traceback_go_down"}
 ]
