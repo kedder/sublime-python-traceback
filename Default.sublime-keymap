@@ -6,6 +6,6 @@
     {
         "keys": ["alt+d"],
         "command": "traceback_goto_line",
-        "context": {"key": "python_traceback"}
+        "context": [{"key": "python_traceback"}]
     }
 ]
