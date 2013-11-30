@@ -34,8 +34,41 @@ class TracebackPasteCommand(sublime_plugin.WindowCommand):
 
         # Put cursor to the bottom of the screen
         self.view_tail(v)
-
+        # Place markers on lines, that belongs to current project
+        self.mark_lines(v)
+        # Show the traceback buffer (if hidden)
         self.window.focus_view(v)
+
+    def mark_lines(self, view):
+        total_lines, _ = view.rowcol(view.size())
+        ownregions = []
+
+        last_tb_line = None
+
+        for lnum in range(total_lines):
+            reg = view.line(view.text_point(lnum, 0))
+            line_contents = view.substr(reg)
+            tbfname, tbline = parse_line(line_contents)
+            if not tbfname:
+                continue
+
+            last_tb_line = lnum
+            if self.is_own_file(tbfname):
+                ownregions.append(reg)
+
+        view.add_regions("traceback.own", ownregions,
+                         "keyword", "dot",
+                         sublime.PERSISTENT | sublime.HIDDEN)
+
+        if last_tb_line is not None:
+            # For convenience, cursor will be placed on the last traceback line
+            view.run_command("goto_line", {"line": last_tb_line+1})
+
+    def is_own_file(self, filename):
+        for f in self.window.folders():
+            if filename.startswith(f):
+                return True
+        return False
 
     def view_tail(self, view):
         """Display the end of the buffer in view port
