@@ -1,4 +1,5 @@
 import re
+import os
 
 import sublime
 import sublime_plugin
@@ -48,7 +49,7 @@ class TracebackPasteCommand(sublime_plugin.WindowCommand):
         for lnum in range(total_lines):
             reg = view.line(view.text_point(lnum, 0))
             line_contents = view.substr(reg)
-            tbfname, tbline = parse_line(line_contents)
+            tbfname, tbline = parse_line(line_contents, self.window.folders())
             if not tbfname:
                 continue
 
@@ -168,7 +169,7 @@ def jump_to_next(window, direction):
 
 
 def jump_to(window, line):
-    fname, lineno = parse_line(line)
+    fname, lineno = parse_line(line, window.folders())
     if fname is None:
         return False
 
@@ -176,7 +177,7 @@ def jump_to(window, line):
     return True
 
 
-def parse_line(line):
+def parse_line(line, folders):
     not_found = None, None
     if not line:
         return not_found
@@ -186,7 +187,25 @@ def parse_line(line):
         return not_found
 
     filename, lnum = m.groups()
-    return filename, int(lnum)
+    lnum = int(lnum)
+    # Now try to match filename with real file. If real file is not found - we
+    # cannot treat this line as a "traceback" line.
+    if os.path.exists(filename):
+        return os.path.abspath(filename), lnum
+
+    if os.path.isabs(filename):
+        # Absolute filename is provided, but it does not exist on the system -
+        # give up soon.
+        return not_found
+
+    # Try match path to any of open folders
+    for f in folders:
+        candidate_filename = os.path.normpath(os.path.join(f, filename))
+        if os.path.exists(candidate_filename):
+            return candidate_filename, lnum
+
+    # We cannot match filename to file on filesystem
+    return not_found
 
 
 def open_file(window, filename, linenum):
