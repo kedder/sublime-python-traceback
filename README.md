@@ -35,3 +35,18 @@ Command                 | Title                      | Default Key Binding
 `traceback_goto_line`   | Traceback: Go To Line      | `Alt+d`
 `traceback_go_up`       | Traceback: Go Up           | `Alt+k`
 `traceback_go_down`     | Traceback: Go Down         | `Alt+j`
+
+
+Installation
+------------
+
+To install this plugin, you have two options:
+
+1. **Package Control** (recommended). If you have [Sublime Package
+   Control](https://sublime.wbond.net/) installed, simply search for
+   `PythonTraceback` to install.
+
+2. **Manual**. Clone source code to Sublime Text `Packages` folder:
+```bash
+$ git clone https://github.com/kedder/sublime-python-traceback PythonTraceback
+```
