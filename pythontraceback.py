@@ -193,19 +193,35 @@ def parse_line(line, folders):
     if os.path.exists(filename):
         return os.path.abspath(filename), lnum
 
-    if os.path.isabs(filename):
-        # Absolute filename is provided, but it does not exist on the system -
-        # give up soon.
-        return not_found
-
-    # Try match path to any of open folders
-    for f in folders:
-        candidate_filename = os.path.normpath(os.path.join(f, filename))
-        if os.path.exists(candidate_filename):
-            return candidate_filename, lnum
+    # Try to find referenced file in given folders
+    found = find_file(filename, folders)
+    if found:
+        return found, lnum
 
     # We cannot match filename to file on filesystem
     return not_found
+
+
+def find_file(filename, folders):
+    """Find relative filename in one of the folders
+
+    Return found filename or None, if file is not found
+    """
+    for f in folders:
+        candidate_filename = os.path.normpath(os.path.join(f, filename))
+
+        if os.path.exists(candidate_filename):
+            return candidate_filename
+
+    if os.path.sep not in filename:
+        # this is a simple filename, give up
+        return None
+
+    # This might be a traceback from remote machine with files that does not
+    # match local filesystem exactly. Nevertheless, we try to find subpath,
+    # that will fit into local filesystem.
+    head, tail = filename.split(os.path.sep, 1)
+    return find_file(tail, folders)
 
 
 def open_file(window, filename, linenum):

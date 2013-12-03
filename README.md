@@ -17,6 +17,12 @@ If you are working on a project, traceback lines, that match your project'
 files, will be specially marked by little dots in gutter to make it simple to
 spot "own" files.
 
+PythonTraceback will try hard to find local file that matches one, specified in
+traceback, even if it does not exists directly. If at least partial path can be
+found in one of your project folders, PythonTraceback will open the file for
+you. This is very useful for analyzing tracebacks from remote machines, where
+application is located in different directory.
+
 
 Defined commands
 ----------------
