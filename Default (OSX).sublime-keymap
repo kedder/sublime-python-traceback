@@ -2,12 +2,12 @@
     {
         "keys": ["super+t", "super+v"],
         "command": "traceback_paste"
-    }
+    },
     {
         "keys": ["alt+d"],
         "command": "traceback_goto_line",
         "context": {"key": "python_traceback"}
-    }
+    },
     {
         "keys": ["alt+k"],
         "command": "traceback_go_up"
